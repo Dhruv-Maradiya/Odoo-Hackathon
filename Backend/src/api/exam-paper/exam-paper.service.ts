@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamPaperDto } from './dto/create-exam-paper.dto';
 import { UpdateExamPaperDto } from './dto/update-exam-paper.dto';
+import { AuditService } from '../audit/audit.service';
 
 type CreateExamPaperArgs = {
   data: CreateExamPaperDto;
   organizationId: string;
+  userId: string;
 };
 
 type GetExamByIdArgs = {
@@ -16,17 +18,20 @@ type GetExamByIdArgs = {
 };
 
 type GetAllExamsArgs = {
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
   search: string;
   organizationId: string;
   userId: string;
   role: string;
+  examId: string;
 };
 
 type UpdateExamPaperArgs = {
   data: UpdateExamPaperDto;
   id: string;
+  userId: string;
+  organizationId: string;
 };
 
 type DeleteExamPaperArgs = {
@@ -44,11 +49,15 @@ const defaultSelect = {
       name: true,
     },
   },
+  url: true,
 };
 
 @Injectable()
 export class ExamPaperService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
 
   async getAllExamPaper({
     page,
@@ -57,14 +66,22 @@ export class ExamPaperService {
     organizationId,
     role,
     userId,
+    examId,
   }: GetAllExamsArgs) {
     const exam = {};
+    const whereData = {};
 
     if (role === 'INVIGILATOR') {
       exam['invigilators'] = {
         some: {
           userId: userId,
         },
+      };
+      whereData['accessEnd'] = {
+        gte: new Date(),
+      };
+      whereData['accessStart'] = {
+        lte: new Date(),
       };
     }
 
@@ -76,9 +93,11 @@ export class ExamPaperService {
           },
           organizationId,
           exam: exam,
+          examId,
+          ...whereData,
         },
-        take: pageSize,
-        skip: (page - 1) * pageSize,
+        take: pageSize || undefined,
+        skip: (page - 1) * pageSize || undefined,
         select: defaultSelect,
       }),
       this.prisma.exam_paper.count({
@@ -86,6 +105,7 @@ export class ExamPaperService {
           name: {
             contains: search,
           },
+          examId,
           organizationId,
           exam: exam,
         },
@@ -123,7 +143,14 @@ export class ExamPaperService {
     return paper;
   }
 
-  createExamPaper({ data, organizationId }: CreateExamPaperArgs) {
+  createExamPaper({ data, organizationId, userId }: CreateExamPaperArgs) {
+    this.auditService.log({
+      userId: userId,
+      organizationId: organizationId,
+      entity: 'EXAM_PAPER',
+      action: 'CREATE',
+      message: `Created exam paper ${data.name}`,
+    });
     return this.prisma.exam_paper.create({
       data: {
         accessEnd: data.accessEndTime,
@@ -139,12 +166,21 @@ export class ExamPaperService {
             id: organizationId,
           },
         },
+        url: data.url,
       },
       select: defaultSelect,
     });
   }
 
-  updateExamPaper({ data, id }: UpdateExamPaperArgs) {
+  updateExamPaper({ data, id, userId, organizationId }: UpdateExamPaperArgs) {
+    this.auditService.log({
+      userId: userId,
+      organizationId: organizationId,
+      entity: 'EXAM_PAPER',
+      action: 'UPDATE',
+      message: `Updated exam paper ${data.name}`,
+    });
+
     return this.prisma.exam_paper.update({
       where: {
         id: id,

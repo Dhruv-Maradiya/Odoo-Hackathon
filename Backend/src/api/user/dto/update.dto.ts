@@ -30,6 +30,6 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['ADMIN', 'USER'])
+  @IsIn(['ADMIN', 'INVIGILATOR', 'EXAMINER'])
   role: user_role;
 }

@@ -14,6 +14,7 @@ import { verifyEmailTemplate } from 'src/@core/email/templates/verify';
 import { APP_NAME } from 'src/constants/constants';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto, SignupDto } from './dto/auth.dto';
+import { AuditService } from '../audit/audit.service';
 
 type LoginArgs = {
   data: LoginDto;
@@ -40,6 +41,7 @@ export class AuthService {
     private jwt: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
+    private readonly auditService: AuditService,
   ) {}
 
   async login({ data }: LoginArgs) {
@@ -58,6 +60,7 @@ export class AuthService {
             provider: true,
           },
         },
+        organizationId: true,
         deleted: true,
       },
     });
@@ -65,6 +68,14 @@ export class AuthService {
     if (!user) {
       throw new ForbiddenException('invalid credentials');
     }
+
+    this.auditService.log({
+      userId: user.id,
+      action: 'LOGIN',
+      entity: 'USER',
+      message: 'User logged in',
+      organizationId: user.organizationId,
+    });
 
     if (user.deleted) {
       throw new ForbiddenException('Your email is not register with us!');
@@ -145,7 +156,16 @@ export class AuthService {
         email: true,
         id: true,
         role: true,
+        organizationId: true,
       },
+    });
+
+    this.auditService.log({
+      userId: user.id,
+      action: 'SIGNUP',
+      entity: 'USER',
+      message: 'User signed up',
+      organizationId: user.organizationId,
     });
 
     await this.sendVerificationEmail(user.email, user.id);
@@ -355,7 +375,7 @@ export class AuthService {
           subject: `Welcome to ${APP_NAME}`,
           html: verifyEmailTemplate(
             email,
-            `${this.configService.get<string>('host')}/api/v1/auth/verify/${
+            `${this.configService.get<string>('URL')}/api/v1/auth/verify/${
               token.token
             }`,
           ),

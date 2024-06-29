@@ -14,8 +14,10 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() body: LoginDto) {
-    return this.authService.login({ data: body });
+  async login(@Body() body: LoginDto) {
+    const user = await this.authService.login({ data: body });
+
+    return user;
   }
 
   @UseGuards(JwtGuard)

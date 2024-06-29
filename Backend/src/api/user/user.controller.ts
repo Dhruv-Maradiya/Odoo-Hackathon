@@ -18,12 +18,14 @@ import { RoleGuard } from '../auth/guard/role.guard';
 import { CreateUserDto } from './dto/create.dto';
 import { UpdateUserDto } from './dto/update.dto';
 import { UserService } from './user.service';
+import { AuditService } from '../audit/audit.service';
 
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly auditService: AuditService,
   ) {}
 
   @Get('/me')
@@ -84,6 +86,14 @@ export class UserController {
     @GetUser('organizationId') organizationId: string,
     @GetUser('name') adminName: string,
   ) {
+    this.auditService.log({
+      userId,
+      organizationId,
+      action: 'CREATE',
+      entity: 'USER',
+      message: `Created user ${data.name}`,
+    });
+
     return await this.userService.create(
       {
         name: data.name,
@@ -104,7 +114,16 @@ export class UserController {
     @Param('id') id: string,
     @Body() data: UpdateUserDto,
     @GetUser('id') userId: string,
+    @GetUser('organizationId') organizationId: string,
   ) {
+    this.auditService.log({
+      userId,
+      organizationId,
+      action: 'CREATE',
+      entity: 'USER',
+      message: `Created user ${data.name}`,
+    });
+
     return await this.userService.update({
       ...data,
       updatedById: userId,

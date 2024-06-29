@@ -16,4 +16,8 @@ export class CreateExamPaperDto {
   @IsString()
   @IsDateString()
   accessEndTime: string;
+
+  @IsString()
+  @IsNotEmpty()
+  url: string;
 }

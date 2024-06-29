@@ -4,6 +4,7 @@ import { CreateExamDto } from './dto/create-exam.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
 import { exam_status } from '@prisma/client';
 import { Roles } from 'src/constants/roles';
+import { AuditService } from '../audit/audit.service';
 
 type CreateExamArgs = {
   data: CreateExamDto;
@@ -14,6 +15,8 @@ type CreateExamArgs = {
 type UpdateExamArgs = {
   id: string;
   data: UpdateExamDto;
+  userId: string;
+  organizationId: string;
 };
 
 type GetExamArgs = {
@@ -64,9 +67,20 @@ const defaultSelect = {
 
 @Injectable()
 export class ExamService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
 
   async createExam({ data, organizationId, userId }: CreateExamArgs) {
+    this.auditService.log({
+      userId,
+      action: 'create',
+      entity: 'exam',
+      message: `Created exam ${data.name}`,
+      organizationId,
+    });
+
     return this.prisma.exam.create({
       data: {
         name: data.name,
@@ -158,7 +172,15 @@ export class ExamService {
     return { exams, count };
   }
 
-  async updateExam({ data, id }: UpdateExamArgs) {
+  async updateExam({ data, id, userId, organizationId }: UpdateExamArgs) {
+    this.auditService.log({
+      userId: userId,
+      action: 'update',
+      entity: 'exam',
+      message: `Updated exam ${data.name}`,
+      organizationId: organizationId,
+    });
+
     return this.prisma.exam.update({
       where: { id },
       data: {
@@ -178,6 +200,11 @@ export class ExamService {
               userId: invigilatorId,
             })),
             skipDuplicates: true,
+          },
+        },
+        updatedBy: {
+          connect: {
+            id: userId,
           },
         },
       },

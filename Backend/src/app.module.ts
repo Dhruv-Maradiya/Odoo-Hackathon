@@ -15,8 +15,8 @@ import { ApiModule } from './api/api.module';
       load: [config],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      serveRoot: '/public/',
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads/',
       serveStaticOptions: {
         dotfiles: 'allow',
       },

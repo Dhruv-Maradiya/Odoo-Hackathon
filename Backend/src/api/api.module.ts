@@ -8,6 +8,7 @@ import { OAuth2Module } from './oauth2/oauth2.module';
 import { UserModule } from './user/user.module';
 import { ExamModule } from './exam/exam.module';
 import { ExamPaperModule } from './exam-paper/exam-paper.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ExamPaperModule } from './exam-paper/exam-paper.module';
     EmailModule,
     ExamModule,
     ExamPaperModule,
+    AuditModule,
   ],
 })
 export class ApiModule implements NestModule {

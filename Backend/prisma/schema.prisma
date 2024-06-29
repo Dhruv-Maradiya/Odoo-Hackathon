@@ -33,6 +33,7 @@ model user {
   emailVerificationToken email_verification_token[]
   examCreatedByMe        exam[]                     @relation("exma_createdByTouser")
   examUpdatedByMe        exam[]                     @relation("exma_updatedByTouser")
+  audit                  audit[]
 
   @@index([createdById], map: "created_by_idx")
   @@index([updatedById], map: "updated_by_idx")
@@ -64,6 +65,7 @@ model exam_paper {
   name           String       @default("") @db.VarChar(100)
   createdAt      DateTime     @default(now()) @db.Timestamp(0)
   updatedAt      DateTime     @default(now()) @db.Timestamp(0)
+  url            String       @default("") @db.VarChar(255)
   accessStart    DateTime?
   accessEnd      DateTime?
   organizationId String       @db.VarChar(36)
@@ -104,6 +106,7 @@ model organization {
   users      user[]       @relation("user_organizationIdToorganization")
   exam       exam[]
   exam_paper exam_paper[]
+  audit      audit[]
 }
 
 model email_verification_token {
@@ -116,6 +119,18 @@ model email_verification_token {
   user       user     @relation(fields: [userId], references: [id], onUpdate: Restrict, onDelete: Restrict)
 
   @@index([userId], map: "email_verification_token_userId_fkey")
+}
+
+model audit {
+  id             String       @id @default(uuid()) @db.VarChar(36)
+  userId         String       @db.VarChar(36)
+  action         String       @db.VarChar(100)
+  entity         String       @db.VarChar(100)
+  message        String       @db.VarChar(255)
+  createdAt      DateTime     @default(now()) @db.Timestamp(0)
+  organizationId String       @db.VarChar(36)
+  organization   organization @relation(fields: [organizationId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+  user           user         @relation(fields: [userId], references: [id], onUpdate: Restrict, onDelete: Restrict)
 }
 
 model reset_links {

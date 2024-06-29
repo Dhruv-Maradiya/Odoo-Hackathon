@@ -29,7 +29,7 @@ export class ExamController {
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
     @GetUser('organizationId') organizationId: string,
-    @GetUser('userId') userId: string,
+    @GetUser('id') userId: string,
     @GetUser('role') role: string,
   ) {
     return this.examService.getAllExams({
@@ -48,7 +48,7 @@ export class ExamController {
   async getById(
     @Param('id') id: string,
     @GetUser('organizationId') organizationId: string,
-    @GetUser('userId') userId: string,
+    @GetUser('id') userId: string,
     @GetUser('role') role: string,
   ) {
     return this.examService.getExamById({
@@ -77,7 +77,17 @@ export class ExamController {
   @Put(':id')
   @Role(Roles.EXAMINER)
   @UseGuards(JwtGuard, RoleGuard)
-  async update(@Param('id') id: string, @Body() data: UpdateExamDto) {
-    return this.examService.updateExam({ data: data, id: id });
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateExamDto,
+    @GetUser('organizationId') organizationId: string,
+    @GetUser('id') userId: string,
+  ) {
+    return this.examService.updateExam({
+      data: data,
+      id: id,
+      organizationId: organizationId,
+      userId: userId,
+    });
   }
 }
