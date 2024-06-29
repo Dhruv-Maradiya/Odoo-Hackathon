@@ -1,15 +1,41 @@
-import { Box } from '@mui/material'
-import { useSelector } from 'react-redux'
-import { useAuth } from 'src/hooks/useAuth'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchExams } from 'src/store/exam/exam'
+import { fetchUsers } from 'src/store/settings/user'
+import ExamsView from 'src/views/exam'
 
 const Dashboard = () => {
-  const { data: surveys, loading } = useSelector(state => state.dashboard)
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [search, setSearch] = useState('')
 
-  const { user } = useAuth()
+  const dispatch = useDispatch()
 
-  return <Box>Dashboard</Box>
+  const { data, total } = useSelector(state => state.exam)
 
-  // return <DashboardView surveys={surveys} organizationId={user?.organization?.id} loading={loading} />
+  useEffect(() => {
+    dispatch(
+      fetchExams({
+        page: page,
+        pageSize: rowsPerPage,
+        search
+      })
+    )
+    dispatch(fetchUsers())
+  }, [dispatch, page, rowsPerPage, search])
+
+  return (
+    <ExamsView
+      exams={data}
+      page={page}
+      setPage={setPage}
+      rowsPerPage={rowsPerPage}
+      setRowsPerPage={setRowsPerPage}
+      search={search}
+      setSearch={setSearch}
+      total={total}
+    />
+  )
 }
 
 Dashboard.acl = {

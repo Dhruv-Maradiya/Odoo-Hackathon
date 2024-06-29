@@ -146,11 +146,11 @@ const LoginPage = () => {
   )
 
   const azureLogin = async e => {
-    router.replace(`${process.env.BACKEND_API_URL}/v2/auth/microsoft`)
+    router.replace(`${process.env.BACKEND_API_URL}/api/v2/auth/microsoft`)
   }
 
   const googleLogin = async e => {
-    router.replace(`${process.env.BACKEND_API_URL}/v2/auth/google`)
+    router.replace(`${process.env.BACKEND_API_URL}/api/v2/auth/google`)
   }
 
   return (

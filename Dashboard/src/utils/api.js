@@ -1,14 +1,13 @@
 import axios from 'axios'
 
-const baseURL = process.env.BACKEND_API_URL
+export const baseURL = process.env.BACKEND_API_URL
 
 // Create an instance of axios
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL: baseURL + '/api',
   headers: {
     'Content-Type': 'application/json'
   }
 })
-
 
 export default api

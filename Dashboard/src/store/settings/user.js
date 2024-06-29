@@ -70,9 +70,7 @@ export const createMultipleUser = createAsyncThunk(
   'appSetting/createMultipleUser',
   async (data, { rejectWithValue, getState }) => {
     try {
-      const res = await api.post('/v1/users/multiple',
-         data
-      )
+      const res = await api.post('/v1/users/multiple', data)
 
       return res.data
     } catch (err) {
@@ -114,6 +112,17 @@ export const deleteUser = createAsyncThunk('appSetting/deleteUser', async (id, {
   }
 })
 
+// ** Get Audit
+export const getAudit = createAsyncThunk('appSetting/getAudit', async (params, { rejectWithValue }) => {
+  try {
+    const res = await api.get('/v1/audit', { params })
+
+    return res.data
+  } catch (err) {
+    return rejectWithValue(err)
+  }
+})
+
 // ** Slice
 export const appSettingSlice = createSlice({
   name: 'appSetting',
@@ -131,7 +140,8 @@ export const appSettingSlice = createSlice({
       deleting: false,
       editData: null,
       drawerOpen: false
-    }
+    },
+    logs: []
   },
   reducers: {
     setUserLoading: (state, action) => {
@@ -197,9 +207,17 @@ export const appSettingSlice = createSlice({
     builder.addCase(deleteUser.rejected, (state, action) => {
       state.users.deleting = false
     })
-
+    builder.addCase(getAudit.pending, state => {
+      state.users.loading = true
+    })
+    builder.addCase(getAudit.fulfilled, (state, action) => {
+      state.logs = action.payload.data
+      state.users.loading = false
+    })
+    builder.addCase(getAudit.rejected, (state, action) => {
+      state.users.loading = false
+    })
   }
-
 })
 
 export const { setUserLoading, setUser, setEditData, setDrawerOpen } = appSettingSlice.actions

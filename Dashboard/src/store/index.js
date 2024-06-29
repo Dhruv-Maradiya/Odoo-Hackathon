@@ -5,11 +5,13 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import dashboard from 'src/store/dashboard/dashboard'
 import settings, { resetStore } from 'src/store/settings/user'
 import exam from 'src/store/exam/exam'
+import examPaper from 'src/store/exam-paper/exam-paper'
 
 const combinedReducer = combineReducers({
   settings,
   dashboard,
-  exam
+  exam,
+  examPaper
 })
 
 const rootReducer = (state, action) => {

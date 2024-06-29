@@ -24,12 +24,23 @@ const navigation = () => {
         {
           title: 'Users',
           path: '/setting/users',
-          icon: 'tabler:user-circle'
+          icon: 'tabler:user-circle',
+          action: 'manage',
+          subject: 'User'
         },
         {
           title: 'Account',
           path: SETTING_ACCOUNT,
-          icon: 'tabler:user'
+          icon: 'tabler:user',
+          action: 'manage',
+          subject: 'Account'
+        },
+        {
+          title: 'Audit',
+          path: '/setting/audit',
+          icon: 'tabler:shield-check',
+          action: 'manage',
+          subject: 'Audit'
         }
       ],
       action: 'manage',

@@ -38,4 +38,9 @@ const ExamPage = () => {
   )
 }
 
+ExamPage.acl = {
+  action: 'manage',
+  subject: 'Exam'
+}
+
 export default ExamPage
