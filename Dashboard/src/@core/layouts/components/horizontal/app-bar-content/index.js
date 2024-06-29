@@ -58,7 +58,7 @@ const AppBarContent = props => {
               d='M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z'
             />
           </svg> */}
-          <Img src='/Review-Genie-Logo.png' alt='logo' width={32} height={22} />
+          <Img src='/logo.png' alt='logo' width={32} height={22} />
           <Typography
             variant='h6'
             sx={{
